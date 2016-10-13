@@ -31,13 +31,36 @@ const parseFile = (fileBuffer) => {
   file.data = fileBuffer;
   return file;
 };
-const logMessage = (file) => {
-  console.log(`${filename} is ${file.data.length} bytes long and if of mime type ${file.mime}`);
+
+const upload = (file) => {
+  const options = {
+    // Get bucket name from AWS console
+    Bucket: 'silentbucket',
+    // Attach fileBuffer as a stream to send to S3
+    Body: file.data,
+    // Allow anyone to access the URL of the uploaded file
+    ACL: 'public-read',
+    // Tell S3 what the mime-type is
+    ContentType: file.mime,
+    // Pick a filename for S3 to use for the upload
+    Key: `test/test.${file.ext}`
+  };
+  // Don't upload yet, just pass data down Promise chain
+  return Promise.resolve(options);
+
 };
 
+const logMessage = (upload) => {
+  // Get rid of stream for now, to log rest of options in terminal
+  // without seeing the stream
+  delete upload.Body;
+  // Turn pojo into a string
+  console.log(`the upload options are ${JSON.stringify(upload)}`);
+};
 
 readFile(filename)
 .then(parseFile)
+.then(upload)
 .then(logMessage)
 .catch(console.error)
 ;
